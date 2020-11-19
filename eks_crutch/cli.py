@@ -13,7 +13,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         '--token-path',
-        default='/var/run/secrets/eks.amazonaws.com/serviceaccount/token',
+        default=None,
         help='Path to read OIDC token from'
     )
     parser.add_argument(
@@ -28,6 +28,7 @@ def main():
     )
     parser.add_argument(
         '--role-arn',
+        default=None,
         help='ARN of role to assume'
     )
     parser.add_argument('command')
@@ -40,9 +41,12 @@ def main():
         hostname = socket.gethostname()
         session_name = '{}@{}'.format(user, hostname)
 
-    token = eks_crutch.read_token(args.token_path)
+    role_arn = args.role_arn if args.role_arn is not None else os.environ['AWS_ROLE_ARN']
+    token_path = str(args.token_path) if args.token_path is not None else os.environ['AWS_WEB_IDENTITY_TOKEN_FILE']
+
+    token = eks_crutch.read_token(token_path)
     credentials = eks_crutch.assume_role(
-        role_arn=args.role_arn,
+        role_arn=role_arn,
         session_name=session_name,
         token=token,
         duration=args.duration
