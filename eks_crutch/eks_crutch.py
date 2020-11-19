@@ -1,9 +1,12 @@
 """Main module."""
 
 import os
-from typing import TypedDict
+from typing import TypedDict, Union
 
 import boto3
+
+
+AnyPath = Union[str, bytes, os.PathLike]
 
 
 class Credentials(TypedDict):
@@ -27,7 +30,7 @@ def assume_role(role_arn: str, session_name: str, token: str, duration: int = 36
     }
 
 
-def read_token(path: os.PathLike = '/var/run/secrets/eks.amazonaws.com/serviceaccount/token') -> str:
+def read_token(path: AnyPath) -> str:
     with open(path, 'r') as fp:
         token = fp.read()
 
